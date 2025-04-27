@@ -1,16 +1,17 @@
-import { ReactElement, useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, ReactElement } from "react";
 import "../index.css";
 
-type cardProps = {
+type CardProps = {
   el: string;
   index: number;
   isNearCentered: boolean;
 };
 
-export default function SnapScrollCarousel() {
+const items = ["Slide 1", "Slide 2", "Slide 3", "Slide 4", "Slide 5"];
+
+export default function SnapScrollCarousel(): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const [centeredIndex, setCenteredIndex] = useState<number | null>(null);
-  const items = ["Slide 1", "Slide 2", "Slide 3", "Slide 4", "Slide 5"];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,8 +21,7 @@ export default function SnapScrollCarousel() {
       const containerRect = container.getBoundingClientRect();
       const containerCenter = containerRect.left + containerRect.width / 2;
 
-      // Trouver la carte la plus proche du centre
-      let closestIndex = null;
+      let closestIndex: number | null = null;
       let smallestDistance = Infinity;
 
       container.childNodes.forEach((child, index) => {
@@ -44,8 +44,7 @@ export default function SnapScrollCarousel() {
     container?.addEventListener("scroll", handleScroll);
     window.addEventListener("resize", handleScroll);
 
-    // Appel initial
-    handleScroll();
+    handleScroll(); // Premier appel au montage
 
     return () => {
       container?.removeEventListener("scroll", handleScroll);
@@ -53,27 +52,11 @@ export default function SnapScrollCarousel() {
     };
   }, []);
 
-  const Card = ({ el, index, isNearCentered }: cardProps): ReactElement => {
-    return (
-      <div
-        className={`animation-scale ${index === 0 ? "ml-[400px]" : ""} ${
-          index === items.length - 1 ? "mr-[400px]" : ""
-        } ${
-          isNearCentered
-            ? "w-[400px] h-80 transform scale-110"
-            : "w-sm h-60 transform scale-100"
-        } ml-sm snap-center flex-none bg-blue-500 rounded-lg flex items-center justify-center text-white text-2xl font-bold`}
-      >
-        {el}
-      </div>
-    );
-  };
-
   return (
-    <div className="mx-auto w-screen flex justify-center">
+    <div className="flex justify-center w-screen mx-auto">
       <div
         ref={containerRef}
-        className="snap-x snap-mandatory flex items-center w-[800px] overflow-x-scroll scroll-smooth gap-10 hide-scrollbar h-80"
+        className="flex items-center gap-10 w-[800px] h-96 overflow-x-scroll scroll-smooth snap-x snap-mandatory hide-scrollbar"
       >
         {items.map((item, index) => (
           <Card
@@ -84,6 +67,28 @@ export default function SnapScrollCarousel() {
           />
         ))}
       </div>
+    </div>
+  );
+}
+
+function Card({ el, index, isNearCentered }: CardProps): ReactElement {
+  const marginLeft = index === 0 ? "ml-[400px]" : "";
+  const marginRight = index === items.length - 1 ? "mr-[400px]" : "";
+
+  return (
+    <div
+      className={`w-sm h-60 flex-none snap-center flex items-center justify-center
+        rounded-lg bg-blue-500 text-white text-2xl font-bold
+        transform transform-gpu transition-all duration-700 ease-in-out
+        ${marginLeft} ${marginRight}
+        ${
+          isNearCentered
+            ? "scale-110 translate-y-5 rotate-3"
+            : "scale-100 translate-y-0 rotate-0"
+        }
+      `}
+    >
+      {el}
     </div>
   );
 }
