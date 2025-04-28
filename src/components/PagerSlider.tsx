@@ -13,6 +13,13 @@ export default function SnapScrollCarousel(): ReactElement {
   const containerRef = useRef<HTMLDivElement>(null);
   const [centeredIndex, setCenteredIndex] = useState<number | null>(null);
 
+  const handleClick = (index: number) => {
+    if (containerRef.current) {
+      const card = containerRef.current.children[index] as HTMLElement;
+      card.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       if (!containerRef.current) return;
@@ -53,7 +60,7 @@ export default function SnapScrollCarousel(): ReactElement {
   }, []);
 
   return (
-    <div className="flex justify-center w-screen mx-auto">
+    <div className="flex flex-col items-center justify-center w-screen mx-auto">
       <div
         ref={containerRef}
         className="flex items-center gap-10 w-[800px] h-96 overflow-x-scroll scroll-smooth snap-x snap-mandatory hide-scrollbar"
@@ -67,6 +74,29 @@ export default function SnapScrollCarousel(): ReactElement {
           />
         ))}
       </div>
+
+      {/* Boutons en bas pour naviguer */}
+      <div className="flex justify-center items-center gap-4 mt-4">
+        {items.map((item, index) => (
+          <button
+            key={index}
+            onClick={() => handleClick(index)}
+            className={`px-2 py-1 cursor-pointer rounded-full bg-neutral-400/35 transition-all duration-300 ease-in-out ${
+              index === centeredIndex
+                ? " text-neutral-500"
+                : "h-0.5 text-neutral-500"
+            } flex items-center justify-center`}
+          >
+            <span
+              className={`text-sm font-bold text-neutral-500 ${
+                index === centeredIndex ? "flex" : "hidden"
+              }`}
+            >
+              {item}
+            </span>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
@@ -78,7 +108,7 @@ function Card({ el, index, isNearCentered }: CardProps): ReactElement {
   return (
     <div
       className={`w-sm h-60 flex-none snap-center flex items-center justify-center
-        rounded-lg bg-blue-500 text-white text-2xl font-bold
+        rounded-lg bg-neutral-400/35 text-neutral-400/80 text-2xl font-bold
         transform transform-gpu transition-all duration-700 ease-in-out
         ${marginLeft} ${marginRight}
         ${
